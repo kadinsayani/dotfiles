@@ -1,0 +1,23 @@
+#!/usr/bin/zsh
+
+# homebrew and packages
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install python3
+brew install vim
+brew install gh
+brew install --cask amethyst
+brew tap homebrew/cask-fonts
+brew install font-0xproto-nerd-font
+brew install starship
+brew install --cask discord
+brew install rust
+brew install --cask alacritty
+brew install neovim
+brew install lazygit
+
+# zshrc setup
+ln -s $HOME/.config/zshrc/.zshrc $HOME/.zshrc
+
+# settings
+
+# https://macos-defaults.com/dock/scroll-to-open.html
