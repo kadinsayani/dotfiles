@@ -14,10 +14,3 @@ brew install rust
 brew install --cask alacritty
 brew install neovim
 brew install lazygit
-
-# zshrc setup
-ln -s $HOME/.config/zshrc/.zshrc $HOME/.zshrc
-
-# settings
-
-# https://macos-defaults.com/dock/scroll-to-open.html
