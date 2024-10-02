@@ -14,3 +14,6 @@ setopt HIST_VERIFY
 setopt APPEND_HISTORY
 setopt HIST_NO_STORE
 setopt HIST_REDUCE_BLANKS
+
+export EDITOR=nvim
+export VISUAL="$EDITOR"
