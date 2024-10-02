@@ -127,7 +127,17 @@ runcmd:
       "-c",
       "git -C /home/kadinsayani/canonical/lxd remote add origin git@github.com:kadinsayani/lxd.git",
     ]
-  - git config --global gpg.format ssh
-  - git config --global user.email "kadin.sayani@canonical.com"
-  - git config --global user.name "Kadin Sayani"
-  - git config --global user.signingkey /home/kadinsayani/.ssh/id_ed25519.pub
+  - ["su", "kadinsayani", "-c", "git config --global gpg.format ssh"]
+  - [
+      "su",
+      "kadinsayani",
+      "-c",
+      "git config --global user.email 'kadin.sayani@canonical.com'",
+    ]
+  - ["su", "kadinsayani", "-c", "git config --global user.name 'Kadin Sayani'"]
+  - [
+      "su",
+      "kadinsayani",
+      "-c",
+      "git config --global user.signingkey /home/kadinsayani/.ssh/id_ed25519.pub",
+    ]
