@@ -140,7 +140,7 @@ alias gpushforce='git push --force-with-lease --no-verify'
 alias gpush='git push'
 alias grebase='git rebase'
 
-export EDITOR=nvim
+export EDITOR=hx
 export VISUAL=$EDITOR
 
 alias vi='nvim'
