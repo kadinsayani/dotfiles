@@ -140,8 +140,10 @@ alias gpushforce='git push --force-with-lease --no-verify'
 alias gpush='git push'
 alias grebase='git rebase'
 
-export EDITOR=hx
+export EDITOR=nvim
 export VISUAL=$EDITOR
+
+alias vi='nvim'
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
