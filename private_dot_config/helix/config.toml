@@ -1,0 +1,12 @@
+theme="tokyonight"
+
+[editor]
+true-color = true
+
+[editor.cursor-shape]
+insert = "bar"
+
+[editor.soft-wrap]
+enable = true
+wrap-at-text-width = true
+wrap-indicator = ""
