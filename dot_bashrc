@@ -115,7 +115,10 @@ if ! shopt -oq posix; then
 	fi
 fi
 
+export GOROOT=/snap/go/current
+export PATH=/usr/local/go/bin:${PATH}
 GOPATH=$(go env GOPATH)
+export PATH=${GOPATH}/bin:${PATH}
 
 export LXD_SHIFTFS_DISABLE=true
 export CGO_CFLAGS="-I${GOPATH}/deps/dqlite/include/"
