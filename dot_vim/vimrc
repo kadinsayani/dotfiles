@@ -1,0 +1,57 @@
+let g:airline_theme='minimalist'
+" Ensure Vim is not in compatibility mode with older versions
+set nocompatible
+" Plugins
+filetype off
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'ycm-core/YouCompleteMe'
+Plugin 'tpope/vim-fugitive'
+Plugin 'preservim/nerdtree'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+Plugin 'sheerun/vim-polyglot'
+Plugin 'fatih/vim-go'
+Plugin 'github/copilot.vim'
+call vundle#end()
+filetype plugin indent on
+" Set the character encoding to UTF-8
+set encoding=utf-8
+" Enable syntax highlighting for better code readability
+syntax on
+" Display line numbers
+set number
+" Set the number of spaces for each level of indentation
+set shiftwidth=4
+" Set the number of spaces for a tab character
+set tabstop=4
+" Use spaces instead of tabs for indentation
+set expandtab
+" Disable backup files
+set nobackup
+" Incremental search for search operations
+set incsearch
+" Ignore case sensitivity in search operations, unless uppercase letters are used
+set smartcase
+" Show the command being typed
+set showcmd
+" Show the current mode (e.g., Normal, Insert) in the status line
+set showmode
+" Highlight matching parentheses, brackets, etc.
+set showmatch
+" Highlight search results as you type
+set hlsearch
+" Set the maximum number of lines in the command-line history
+set history=1000
+" Enable a visual menu for command-line completion
+set wildmenu
+" Use the longest common substring when completing file names
+set wildmode=list:longest
+" Set the initial size of the terminal window
+set termwinsize=12x0
+" System clipboard
+set clipboard=unnamed
+" NERDTree
+autocmd VimEnter * NERDTree | wincmd p
+autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
