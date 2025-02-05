@@ -132,13 +132,11 @@ alias lxdstart='sudo --preserve-env=PATH,GORACE,LXD_SHIFTFS_DISABLE $GOPATH/bin/
 alias lxdtest='sudo --preserve-env=PATH,GOPATH,GORACE,LXD_INSPECT,LXD_DEBUG,LXD_VERBOSE,LXD_BACKEND,LXD_NIC_BRIDGED_DRIVER,LXD_CEPH_CLUSTER,LXD_CEPH_CEPHOBJECT_RADOSGW,LXD_CONCURRENT,LXD_SKIP_TESTS,LXD_REQUIRED_TESTS,LXD_SHIFTFS_DISABLE LXD_TMPFS=1 LXD_VERBOSE=1 LXD_NIC_SRIOV_PARENT= LXD_TEST_IMAGE= ./main.sh'
 alias lxdgotest='sudo --preserve-env=GOPATH,CGO_CFLAGS,CGO_LDFLAGS_ALLOW,CGO_LDFLAGS,LD_RUN_PATH,PATH go test ./...'
 alias lxddebug='sudo --preserve-env=PATH,CGO_LDFLAGS,CGO_CFLAGS,GORACE,LXD_DIR,LXD_UI LD_LIBRARY_PATH=${LD_LIBRARY_PATH} $GOPATH/bin/dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec $GOPATH/bin/lxd -- --group sudo -v -d' # compile with -gcflags="all=-N -l"
-alias sllxd='../../utils/scripts/sideload.sh'
 alias gcapache='git commit --amend -s --trailer License:Apache-2.0'
 alias forcepush='git push --force-with-lease --no-verify'
 
-export EDITOR=hx
+export EDITOR=nvim
 export VISUAL=$EDITOR
-
 alias vi='nvim'
 
 export NVM_DIR="$HOME/.nvm"
@@ -154,4 +152,8 @@ eval eval -- "$(/usr/local/bin/starship init bash --print-full-init)"
 # testbox script
 alias testbox='~/utils/scripts/testbox.sh'
 # sideload script
+# alias sideload='lxc exec c1 -- sh -c "./sideload.sh";lxc shell c1'
 alias sideload='~/utils/scripts/sideload.sh'
+
+alias makestart='make;lxdstart'
+alias complxc='lxc completion bash > /tmp/complxc;. /tmp/complxc'
