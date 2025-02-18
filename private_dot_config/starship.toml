@@ -7,8 +7,7 @@ ${custom.git_host}\
 $directory\
 $git_state\
 $lua\
-$nodejs\
-$deno\
+$go\
 $package\
 $docker_context\
 $fill\
@@ -51,9 +50,6 @@ surface0 = "#313244"
 base = "#1e1e2e"
 mantle = "#181825"
 crust = "#11111b"
-
-[docker_context]
-format = '[ $context](sky) '
 
 [lua]
 format = '[󰢱 $version](blue) '
@@ -127,16 +123,9 @@ show_notifications = false
 min_time = 10_000
 min_time_to_notify = 1000
 
-[deno]
+[go]
 format = '[$symbol($version)]($style) '
 symbol = '🦖 '
-disabled = false
-
-[nodejs]
-format = '[$symbol($version)]($style) '
-detect_extensions = ['js', 'mjs', 'cjs', 'ts', 'mts', 'cts', 'tsx']
-detect_files = ['node_modules', '.yarn']
-symbol = ' '
 disabled = false
 
 [custom.since_last_commit]
