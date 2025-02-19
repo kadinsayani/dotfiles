@@ -17,6 +17,8 @@ setopt HIST_REDUCE_BLANKS
 
 export EDITOR=nvim
 export VISUAL="$EDITOR"
+alias vi=nvim
+alias lg=lazygit
 # Lines configured by zsh-newuser-install
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
