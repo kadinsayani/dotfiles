@@ -1,0 +1,28 @@
+eval "$(starship init zsh)"
+
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=10000000
+SAVEHIST=10000000
+setopt EXTENDED_HISTORY
+setopt INC_APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_VERIFY
+setopt APPEND_HISTORY
+setopt HIST_NO_STORE
+setopt HIST_REDUCE_BLANKS
+
+export EDITOR=nvim
+export VISUAL="$EDITOR"
+# Lines configured by zsh-newuser-install
+# End of lines configured by zsh-newuser-install
+# The following lines were added by compinstall
+zstyle :compinstall filename '/Users/kadinsayani/.zshrc'
+
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
