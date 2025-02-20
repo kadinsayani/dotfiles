@@ -15,7 +15,6 @@ $time\
 [ ](fg:#1d2230)\
 \n$character"""
 
-[prompt]
 command_timeout=3000
 
 [os]
