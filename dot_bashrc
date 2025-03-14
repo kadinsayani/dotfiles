@@ -159,3 +159,4 @@ alias sideload='~/utils/scripts/sideload.sh'
 
 alias makestart='make;lxdstart'
 alias complxc='lxc completion bash > /tmp/complxc;. /tmp/complxc'
+alias z='zellij'
