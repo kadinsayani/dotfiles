@@ -43,7 +43,7 @@ esac
 # uncomment for a colored prompt, if the terminal has the capability; turned
 # off by default to not distract the user: the focus in a terminal window
 # should be on the output of commands, not on the prompt
-force_color_prompt=yes
+#force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
 	if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
@@ -121,6 +121,8 @@ GOPATH=$(go env GOPATH)
 export PATH=${PATH}:/opt/go/bin:${GOPATH}/bin:~/minio
 # export PATH="${PATH}:$(go env GOPATH)/bin"
 
+export PATH=$PATH:~/.cargo/bin/
+
 export LXD_SHIFTFS_DISABLE=true
 export CGO_CFLAGS="-I${GOPATH}/deps/dqlite/include/"
 export CGO_LDFLAGS="-L${GOPATH}/deps/dqlite/.libs/"
@@ -134,6 +136,7 @@ alias lxdtest='sudo --preserve-env=PATH,GOPATH,GORACE,LXD_INSPECT,LXD_DEBUG,LXD_
 alias lxdgotest='sudo --preserve-env=GOPATH,CGO_CFLAGS,CGO_LDFLAGS_ALLOW,CGO_LDFLAGS,LD_RUN_PATH,PATH go test ./...'
 alias lxddebug='sudo --preserve-env=PATH,CGO_LDFLAGS,CGO_CFLAGS,GORACE,LXD_DIR,LXD_UI LD_LIBRARY_PATH=${LD_LIBRARY_PATH} $GOPATH/bin/dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec $GOPATH/bin/lxd -- --group sudo -v -d' # compile with -gcflags="all=-N -l"
 alias makedebug='make DEBUG="-gcflags=\"all=-N -l\""'
+alias debug='makedebug && lxddebug'
 alias gcapache='git commit --amend -s --trailer License:Apache-2.0'
 alias forcepush='git push --force-with-lease --no-verify'
 
@@ -146,7 +149,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 alias lg='lazygit'
-# eval eval -- "$(/usr/local/bin/starship init bash --print-full-init)"
+eval eval -- "$(/usr/local/bin/starship init bash --print-full-init)"
 
 # tf-reserve
 [ -f ~/canonical/lxd-ci/bin/tf-reserve ] && . ~/canonical/lxd-ci/bin/tf-reserve
@@ -157,6 +160,7 @@ alias testbox='~/utils/scripts/testbox.sh'
 # alias sideload='lxc exec c1 -- sh -c "./sideload.sh";lxc shell c1'
 alias sideload='~/utils/scripts/sideload.sh'
 
-alias makestart='make;lxdstart'
-alias complxc='lxc completion bash > /tmp/complxc;. /tmp/complxc'
+alias complxc='. <(lxc completion bash)'
+alias makestart='make && lxdstart'
 alias z='zellij'
+alias zup='z attach main'
