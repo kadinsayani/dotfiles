@@ -152,7 +152,7 @@ alias lg='lazygit'
 eval eval -- "$(/usr/local/bin/starship init bash --print-full-init)"
 
 # tf-reserve
-[ -f ~/canonical/lxd-ci/bin/tf-reserve ] && . ~/canonical/lxd-ci/bin/tf-reserve
+[ -f ~/git/lxd-ci/bin/tf-reserve ] && . ~/git/lxd-ci/bin/tf-reserve
 
 # testbox script
 alias testbox='~/utils/scripts/testbox.sh'
