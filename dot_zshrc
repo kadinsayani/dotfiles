@@ -1,5 +1,14 @@
-eval "$(starship init zsh)"
+## PROMPT ##
+#eval "$(starship init zsh)"
+autoload -Uz vcs_info
+precmd() { vcs_info }
 
+zstyle ':vcs_info:git:*' formats '%b '
+
+setopt PROMPT_SUBST
+PROMPT='%F{magenta}%T%f %F{white}%m%f %F{blue}%~%f %F{white}${vcs_info_msg_0_}%f> '
+
+## SETTINGS ##
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=10000000
 SAVEHIST=10000000
@@ -30,3 +39,7 @@ compinit
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
+alias start='tailscale up && ssh devbox'
+alias pause='tailscale down'
+alias z='zellij'
+alias zup='zellij attach main'
