@@ -1,33 +1,23 @@
-
 [env]
 TERM = "alacritty"
 
 [font]
 size = 12
 
-[font.bold]
-family = "0xProto Nerd Font Mono"
-style = "Bold"
-
-[font.italic]
-family = "0xProto Nerd Font Mono"
-style = "Italic"
-
 [font.normal]
-family = "0xProto Nerd Font Mono"
+family = "UbuntuMono Nerd Font Mono"
 style = "Regular"
 
 [window]
-decorations = "Full"
+decorations = "None"
 startup_mode = "Maximized"
 dynamic_title = false
 option_as_alt = "OnlyLeft"
+#opacity = 0.90
 
 [window.padding]
 x = 0
 y = 0
 
 [general]
-import = [
-    "~/.config/alacritty/themes/themes/tokyo-night.toml"
-]
+import = ["~/.config/alacritty/themes/themes/tokyo-night.toml"]
