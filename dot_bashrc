@@ -117,7 +117,7 @@ fi
 
 # export PATH=/usr/local/go/bin:${PATH}
 GOPATH=$(go env GOPATH)
-# export PATH=${GOPATH}/bin:${PATH}
+#export PATH=${GOPATH}/bin:${PATH}
 export PATH=${PATH}:/opt/go/bin:${GOPATH}/bin:~/minio
 # export PATH="${PATH}:$(go env GOPATH)/bin"
 
@@ -132,7 +132,7 @@ export CGO_LDFLAGS_ALLOW="(-Wl,-wrap,pthread_create)|(-Wl,-z,now)"
 alias cdlxd='cd ~/lxd'
 alias lxd='sudo --preserve-env=PATH,GORACE,LXD_SHIFTFS_DISABLE $GOPATH/bin/lxd'
 alias lxdstart='sudo --preserve-env=PATH,GORACE,LXD_SHIFTFS_DISABLE $GOPATH/bin/lxd --group sudo -v -d'
-alias lxdtest='sudo --preserve-env=PATH,GOPATH,GORACE,LXD_INSPECT,LXD_DEBUG,LXD_VERBOSE,LXD_BACKEND,LXD_NIC_BRIDGED_DRIVER,LXD_CEPH_CLUSTER,LXD_CEPH_CEPHOBJECT_RADOSGW,LXD_CONCURRENT,LXD_SKIP_TESTS,LXD_REQUIRED_TESTS,LXD_SHIFTFS_DISABLE LXD_TMPFS=1 LXD_VERBOSE=1 LXD_NIC_SRIOV_PARENT= LXD_TEST_IMAGE= ./main.sh'
+alias lxdtest='cd ~/git/lxd/test && sudo --preserve-env=PATH,GOPATH,GORACE,LXD_INSPECT,LXD_DEBUG,LXD_VERBOSE,LXD_BACKEND,LXD_NIC_BRIDGED_DRIVER,LXD_CEPH_CLUSTER,LXD_CEPH_CEPHOBJECT_RADOSGW,LXD_CONCURRENT,LXD_SKIP_TESTS,LXD_REQUIRED_TESTS,LXD_SHIFTFS_DISABLE LXD_TMPFS=1 LXD_VERBOSE=1 LXD_NIC_SRIOV_PARENT= LXD_TEST_IMAGE= ./main.sh'
 alias lxdgotest='sudo --preserve-env=GOPATH,CGO_CFLAGS,CGO_LDFLAGS_ALLOW,CGO_LDFLAGS,LD_RUN_PATH,PATH go test ./...'
 alias lxddebug='sudo --preserve-env=PATH,CGO_LDFLAGS,CGO_CFLAGS,GORACE,LXD_DIR,LXD_UI LD_LIBRARY_PATH=${LD_LIBRARY_PATH} $GOPATH/bin/dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec $GOPATH/bin/lxd -- --group sudo -v -d' # compile with -gcflags="all=-N -l"
 alias makedebug='make DEBUG="-gcflags=\"all=-N -l\""'
@@ -161,6 +161,12 @@ alias testbox='~/utils/scripts/testbox.sh'
 alias sideload='~/utils/scripts/sideload.sh'
 
 alias complxc='. <(lxc completion bash)'
+alias initlxd='lxd init --auto && lxc alias add sh "exec @ARGS@ -- su -l --whitelist-environment EDITOR" && lxc profile set default environment.EDITOR vi'
 alias makestart='make && lxdstart'
 alias z='zellij'
 alias zup='z attach main'
+eval "$(gh copilot alias -- bash)"
+alias beam='~/git/utils/scripts/beam.sh'
+export PATH="$HOME/.local/bin:$PATH"
+export MICROCLOUD_DEBUG_PATH=~/go/bin/microcloud
+export MICROCLOUDD_DEBUG_PATH=~/go/bin/microcloudd
