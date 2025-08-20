@@ -1,4 +1,4 @@
-theme="tokyonight"
+theme = "tokyonight"
 
 [editor]
 true-color = true
@@ -12,7 +12,7 @@ insert = "bar"
 [editor.soft-wrap]
 enable = true
 wrap-at-text-width = false
-wrap-indicator = ""                                                                                                    
+wrap-indicator = ""
 
 [editor.indent-guides]
 render = true
