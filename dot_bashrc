@@ -170,3 +170,4 @@ alias beam='~/git/utils/scripts/beam.sh'
 export PATH="$HOME/.local/bin:$PATH"
 export MICROCLOUD_DEBUG_PATH=~/go/bin/microcloud
 export MICROCLOUDD_DEBUG_PATH=~/go/bin/microcloudd
+alias lx='lxc exec $1 -- '
