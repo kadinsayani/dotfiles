@@ -164,7 +164,8 @@ alias complxc='. <(lxc completion bash)'
 alias initlxd='lxd init --auto && lxc alias add sh "exec @ARGS@ -- su -l --whitelist-environment EDITOR" && lxc profile set default environment.EDITOR vi'
 alias makestart='make && lxdstart'
 alias z='zellij'
-alias zup='z attach main'
+alias znew='z -s dev -n ~/.config/zellij/dev.kdl'
+alias zup='z attach dev'
 eval "$(gh copilot alias -- bash)"
 alias beam='~/git/utils/scripts/beam.sh'
 export PATH="$HOME/.local/bin:$PATH"
