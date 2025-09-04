@@ -10,6 +10,7 @@ vim.opt.smartindent = true -- Autoindent new lines
 vim.opt.wrap = true
 vim.opt.linebreak = true
 vim.opt.conceallevel = 0
+vim.g.lazyvim_picker = "telescope"
 local is_tmux_session = vim.env.TERM_PROGRAM == "tmux"
 if vim.env.SSH_TTY and not is_tmux_session then
   local function paste()
