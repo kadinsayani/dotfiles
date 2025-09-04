@@ -1,0 +1,69 @@
+layout {
+    default_tab_template {
+         pane size=1 borderless=true {
+             plugin location="zellij:tab-bar"
+         }
+         children
+         pane size=2 borderless=true {
+             plugin location="zellij:status-bar"
+         }
+    }
+    pane_template name="term" {
+        pane split_direction="horizontal" {
+            children
+            pane size="20%"
+        }
+    }
+    tab_template name="strider_tab" {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        pane split_direction="Vertical" {
+            pane {
+                plugin location="zellij:strider"
+            }
+            children
+        }
+        pane size=2 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+    tab name="lxd" cwd="~/git/lxd" focus=true {
+        term split_direction="vertical" {
+            pane command="nvim"
+			pane size="30%"
+        }
+    }
+    tab name="notes" cwd="~/git/notes/" {
+        term split_direction="vertical" {
+            pane edit="./todo.txt"
+			pane size="30%"
+        }
+    }
+    tab name="lxcfs" cwd="~/git/lxcfs" {
+        term split_direction="vertical" {
+            pane command="nvim"
+			pane size="30%"
+        }
+    }
+    tab name="lxc" cwd="~/git/lxc" {
+        term split_direction="vertical" {
+            pane command="nvim"
+			pane size="30%"
+        }
+    }
+    tab name="linux" cwd="~/git/linux" {
+        term split_direction="vertical" {
+            pane command="nvim"
+			pane size="30%"
+        }
+    }
+	tab name="monitor" {
+		term split_direction="vertical" {
+			pane command="htop"
+			pane command="lxc" {
+				args "monitor" "--pretty"
+			}
+		}
+	}
+}
