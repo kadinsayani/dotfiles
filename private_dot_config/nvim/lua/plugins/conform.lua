@@ -10,7 +10,7 @@ return {
       clang_format = {
         prepend_args = { "--style=file", "--fallback-style=LLVM" },
       },
-      sh = {
+      shfmt = {
         prepend_args = { "-i", "2" },
       },
     },
