@@ -11,7 +11,7 @@ layout {
     pane_template name="term" {
         pane split_direction="horizontal" {
             children
-            pane size="20%"
+            pane size="25%"
         }
     }
     tab_template name="strider_tab" {
@@ -31,19 +31,17 @@ layout {
     tab name="lxd" cwd="~/git/lxd" focus=true {
         term split_direction="vertical" {
 			pane
-			pane size="25%"
+			pane size="30%"
         }
     }
     tab name="~/git" cwd="~/git" {
         term split_direction="vertical" {
 			pane
-			pane size="25%"
         }
     }
     tab name="notes" cwd="~/git/notes/" {
         term split_direction="vertical" {
 			pane
-			pane size="25%"
         }
     }
 	tab name="monitor" {
@@ -52,6 +50,12 @@ layout {
 			pane command="lxc" {
 				args "monitor" "--pretty"
 			}
+		}
+	}
+	tab name="copilot" cwd="~/git/lxd" {
+		term split_direction="vertical" {
+			pane command="copilot"
+			pane
 		}
 	}
 }
