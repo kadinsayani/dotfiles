@@ -1,0 +1,13 @@
+{
+    "github" : {
+        "icon": "brands@github",
+        "label": "github",
+        "blockdef": {
+            "meta": {
+                "view": "web",
+                "url": "https://github.com",
+                "pinnedurl": "https://google.com"
+            }
+        }
+    }
+}

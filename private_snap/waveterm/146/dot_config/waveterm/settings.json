@@ -1,0 +1,6 @@
+{
+  "autoupdate:channel": "latest",
+  "telemetry:enabled": true,
+  "term:fontfamily": "UbuntuMono Nerd Font Mono",
+  "term:fontsize": 15
+}
