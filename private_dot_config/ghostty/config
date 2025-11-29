@@ -59,14 +59,16 @@ keybind = ctrl+alt+k=new_split:up
 keybind = ctrl+alt+h=new_split:left
 keybind = ctrl+alt+l=new_split:right
 keybind = alt+j=goto_split:down
-keybind = alt+k=goto_split:down
+keybind = alt+k=goto_split:up
 keybind = alt+h=goto_split:left
 keybind = alt+l=goto_split:right
-keybind = ctrl+t=new_tab
-keybind = ctrl+w=close_tab:this
+keybind = ctrl+alt+;=new_tab
+keybind = ctrl+alt+w=close_tab:this
 keybind = alt+bracket_right=next_tab
 keybind = alt+bracket_left=previous_tab
 keybind = ctrl+arrow_right=resize_split:right,10
 keybind = ctrl+arrow_left=resize_split:left,10
 keybind = ctrl+arrow_up=resize_split:up,10
 keybind = ctrl+arrow_down=resize_split:down,10
+
+window-subtitle = working-directory
