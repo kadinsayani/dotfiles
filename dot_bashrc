@@ -172,6 +172,12 @@ export PATH="$HOME/.local/bin:$PATH"
 export MICROCLOUD_DEBUG_PATH=~/go/bin/microcloud
 export MICROCLOUDD_DEBUG_PATH=~/go/bin/microcloudd
 alias lx='lxc exec $1 -- '
+
+lxt() {
+  lxc config device set lxdtest lxd-git source=$(pwd)
+  lxc exec lxdtest -- bash -c "cd lxd && make && make test-shell"
+}
+
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 mkcd () {
