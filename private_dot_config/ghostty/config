@@ -47,7 +47,7 @@
 # # which is explained in the docs for that config option.
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
-theme = Catppuccin Mocha
+theme = TokyoNight Night
 font-family = UbuntuMono Nerd Font Mono
 font-size = 12
 fullscreen = true
@@ -62,6 +62,7 @@ keybind = alt+j=goto_split:down
 keybind = alt+k=goto_split:up
 keybind = alt+h=goto_split:left
 keybind = alt+l=goto_split:right
+keybind = alt+0=equalize_splits
 keybind = ctrl+alt+;=new_tab
 keybind = ctrl+alt+w=close_tab:this
 keybind = alt+bracket_right=next_tab
@@ -72,3 +73,4 @@ keybind = ctrl+arrow_up=resize_split:up,10
 keybind = ctrl+arrow_down=resize_split:down,10
 
 window-subtitle = working-directory
+macos-option-as-alt = left
