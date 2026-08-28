@@ -77,9 +77,14 @@ section_core() {
     apt_install \
       build-essential git curl wget ca-certificates gnupg unzip xz-utils \
       jq tree htop tmux rsync socat netcat-openbsd whois bind9-dnsutils \
-      ripgrep fd-find git-delta shellcheck hyperfine just pandoc \
-      python3 python3-venv python3-pynvim \
+      ripgrep fd-find git-delta shellcheck hyperfine pandoc fzf bat \
+      python3 python3-venv python3-pynvim python3-yaml \
+      gettext-base libsecret-tools \
       xclip wl-clipboard asciinema
+
+    # just MUST come from apt, not snap: lxd-dev's `just setup-keyring` needs D-Bus
+    # secret-service access, which snap confinement blocks. See lxd-dev/README.md.
+    apt_install just
 
     # gh is not in the Ubuntu archive.
     apt_repo github-cli https://cli.github.com/packages/githubcli-archive-keyring.gpg \
@@ -97,7 +102,7 @@ section_core() {
     have brew || run /bin/bash -c \
       "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew_install git curl wget jq tree htop tmux rsync socat \
-      ripgrep fd git-delta shellcheck hyperfine just pandoc \
+      ripgrep fd git-delta shellcheck hyperfine just pandoc fzf bat \
       python3 gh neovim helix yq chezmoi asciinema
   fi
 }
@@ -131,9 +136,12 @@ section_lxd() {
     qemu-system-x86 qemu-utils qemu-block-extra qemu-user-static \
     virtiofsd swtpm busybox-static umoci expect s3cmd
 
-  snap_install lxd
+  # This machine tracks latest/edge; lxd-dev's README asks for --channel=6/candidate.
+  snap_install lxd --channel=latest/edge
   snap_install snapcraft --classic
   snap_install rockcraft --classic
+  # The container layer the whole lxd-dev workflow runs inside.
+  snap_install workshop --classic
 
   if ! getent group lxd | grep -w "$USER" >/dev/null; then
     run sudo usermod -aG lxd "$USER"
@@ -186,7 +194,20 @@ section_node() {
   if [ "$OS" = linux ]; then apt_install nodejs npm; else brew_install node; fi
   have npm || { warn "npm not on PATH; skipping global installs"; return 0; }
   run npm install -g @github/copilot @openai/codex opencode-ai
-  info "Claude Code: https://claude.com/claude-code"
+
+  # Claude Code is not on npm; it installs into ~/.local/share/claude and
+  # symlinks ~/.local/bin/claude.
+  if have claude; then
+    info "claude already installed ($(claude --version 2>/dev/null || echo present))"
+  elif [ "$DRY_RUN" = 1 ]; then
+    info "\$ curl -fsSL https://claude.ai/install.sh | bash"
+  else
+    curl -fsSL https://claude.ai/install.sh | bash
+  fi
+  case ":$PATH:" in
+    *":$HOME/.local/bin:"*) ;;
+    *) warn "add \$HOME/.local/bin to PATH for the claude binary" ;;
+  esac
 }
 
 section_desktop() {
@@ -205,6 +226,11 @@ section_desktop() {
       "deb [signed-by=/etc/apt/keyrings/tailscale.gpg] https://pkgs.tailscale.com/stable/ubuntu ${codename} main"
     apt_install tailscale
     info "run 'sudo tailscale up' to authenticate"
+
+    # ProxyCommand for Host *.canonical.is in ~/.ssh/config.
+    snap_install charmed-cloudflared
+    # Needed by the id_ed25519_sk (FIDO) key.
+    apt_install yubikey-manager yubikey-personalization
   else
     run brew install --cask visual-studio-code google-chrome ghostty mattermost tailscale
   fi
@@ -234,6 +260,86 @@ section_fonts() {
     rm -rf "$tmp"
     fc-cache -f "$dir" >/dev/null
   fi
+}
+
+section_ssh() {
+  log "SSH keys + agent"
+  local key="$HOME/.ssh/id_ed25519"
+
+  run mkdir -p "$HOME/.ssh"
+  [ "$DRY_RUN" = 1 ] || chmod 700 "$HOME/.ssh"
+
+  if [ -f "$key" ]; then
+    info "$key already exists — leaving it alone"
+  elif [ "$DRY_RUN" = 1 ]; then
+    info "\$ ssh-keygen -t ed25519 -C \"$(git config --global user.email 2>/dev/null)\" -f $key"
+  else
+    ssh-keygen -t ed25519 -C "$(git config --global user.email 2>/dev/null || echo "$USER@$(hostname)")" -f "$key" -N ""
+    chmod 600 "$key"
+  fi
+
+  # Pre-seed github.com so the first clone does not stop on a host-key prompt.
+  if [ "$DRY_RUN" = 1 ]; then
+    info "\$ ssh-keyscan github.com >> ~/.ssh/known_hosts"
+  elif ! ssh-keygen -F github.com >/dev/null 2>&1; then
+    ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null
+    info "added github.com to known_hosts"
+  else
+    info "github.com already in known_hosts"
+  fi
+
+  if [ "$DRY_RUN" = 1 ]; then
+    info "\$ eval \$(ssh-agent -s) && ssh-add $key"
+  else
+    [ -n "${SSH_AUTH_SOCK:-}" ] || eval "$(ssh-agent -s)" >/dev/null
+    ssh-add "$key" 2>/dev/null || warn "could not ssh-add $key"
+  fi
+
+  if [ -f "${key}.pub" ] && [ "$DRY_RUN" != 1 ]; then
+    if have gh && gh auth status >/dev/null 2>&1; then
+      info "gh is authenticated; upload with: gh ssh-key add ${key}.pub"
+    else
+      printf '\n'
+      info "add this key to GitHub (https://github.com/settings/keys):"
+      printf '    %s\n\n' "$(cat "${key}.pub")"
+      info "the 'repos' and 'lxddev' sections clone over SSH and need it"
+    fi
+  fi
+}
+
+section_lxddev() {
+  if [ "$OS" != linux ]; then
+    warn "skipping lxd-dev: Linux only (Workshop snap requires Ubuntu)"
+    return 0
+  fi
+  log "lxd-dev prerequisites"
+
+  # Required before any `just` recipe runs: jq is read at Justfile parse time,
+  # secret-tool backs the token keyring, PyYAML drives generate-workshop-config,
+  # envsubst renders the VM cloud-init.
+  apt_install jq libsecret-tools python3-yaml gettext-base rsync openssh-client
+
+  if ! have just; then
+    warn "just is missing — run the 'core' section first (apt, not snap)"
+  elif have just && [ "$(command -v just)" != "/usr/bin/just" ]; then
+    warn "just is not the apt build ($(command -v just)); keyring setup will fail"
+  else
+    info "just is the apt build"
+  fi
+
+  snap_install workshop --classic
+
+  local repo="$GIT_DIR/lxd-dev"
+  if [ ! -d "$repo/.git" ]; then
+    warn "lxd-dev not cloned yet — run the 'repos' section first"
+    return 0
+  fi
+
+  info "remaining steps are interactive and must be run by hand, in $repo:"
+  info "  just install-tools"
+  info "  # confirm config/$USER/config.json has your handle/email/repos"
+  info "  just setup       # prompts for Copilot + gh tokens via secret-tool"
+  info "see $repo/README.md"
 }
 
 section_repos() {
@@ -282,7 +388,7 @@ section_dotfiles() {
 
 # ---------------------------------------------------------------- main
 
-ALL_SECTIONS=(core lxd go rust node desktop fonts repos dotfiles)
+ALL_SECTIONS=(core lxd go rust node desktop fonts ssh repos lxddev dotfiles)
 
 main() {
   local sections=("$@")

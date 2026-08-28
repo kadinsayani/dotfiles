@@ -247,7 +247,7 @@ load_plugins {
 // Choose the theme that is specified in the themes section.
 // Default: default
 // 
-theme "catppuccin-mocha"
+theme "tokyo-night"
  
 // Choose the base input mode of zellij.
 // Default: normal
@@ -428,3 +428,20 @@ pane_frames false
 // Default: true
 // 
 // show_release_notes false
+
+// Tokyo Night (night) — defined explicitly so it does not depend on a built-in theme name.
+themes {
+    tokyo-night {
+        fg "#c0caf5"
+        bg "#1a1b26"
+        black "#414868"
+        red "#f7768e"
+        green "#9ece6a"
+        yellow "#e0af68"
+        blue "#7aa2f7"
+        magenta "#bb9af7"
+        cyan "#7dcfff"
+        white "#c0caf5"
+        orange "#ff9e64"
+    }
+}

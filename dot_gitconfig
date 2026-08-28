@@ -29,3 +29,7 @@
 	autoupdate = true
 [init]
 	defaultBranch = main
+[gpg "ssh"]
+	allowedSignersFile = ~/.ssh/allowed_signers
+[delta]
+	syntax-theme = tokyonight_night
