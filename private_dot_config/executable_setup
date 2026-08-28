@@ -1,16 +1,302 @@
-#!/usr/bin/zsh
+#!/usr/bin/env bash
+#
+# Bootstrap a new machine.
+#
+#   bash ~/.config/setup            # everything
+#   bash ~/.config/setup core go    # only the named sections
+#   DRY_RUN=1 bash ~/.config/setup  # print what would run, change nothing
+#
+# Idempotent: safe to re-run. Sections: core lxd go rust node desktop fonts repos dotfiles
+#
+set -euo pipefail
 
-# homebrew and packages
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install python3
-brew install vim
-brew install gh
-brew install --cask amethyst
-brew tap homebrew/cask-fonts
-brew install font-0xproto-nerd-font
-brew install starship
-brew install --cask discord
-brew install rust
-brew install --cask alacritty
-brew install neovim
-brew install lazygit
+DRY_RUN="${DRY_RUN:-0}"
+GIT_DIR="$HOME/git"
+LXD_DEV_FORK="git@github.com:kadinsayani/lxd-dev.git"
+LXD_DEV_UPSTREAM="git@github.com:canonical/lxd-dev.git"
+
+case "$(uname -s)" in
+  Linux)  OS=linux ;;
+  Darwin) OS=macos ;;
+  *) echo "unsupported OS: $(uname -s)" >&2; exit 1 ;;
+esac
+
+log()  { printf '\n\033[38;2;122;162;247m==>\033[0m \033[1m%s\033[0m\n' "$*"; }
+info() { printf '    \033[38;2;115;122;162m%s\033[0m\n' "$*"; }
+warn() { printf '    \033[38;2;224;175;104mwarn:\033[0m %s\n' "$*"; }
+run()  {
+  if [ "$DRY_RUN" = 1 ]; then printf '    \033[38;2;86;95;137m$ %s\033[0m\n' "$*"; else "$@"; fi
+}
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# ---------------------------------------------------------------- package mgr
+
+APT_UPDATED=0
+apt_install() {
+  [ "$OS" = linux ] || return 0
+  if [ "$APT_UPDATED" = 0 ]; then run sudo apt-get update -qq; APT_UPDATED=1; fi
+  run sudo apt-get install -y --no-install-recommends "$@"
+}
+
+brew_install() {
+  [ "$OS" = macos ] || return 0
+  run brew install "$@"
+}
+
+snap_install() {  # snap_install <name> [--classic]
+  [ "$OS" = linux ] || return 0
+  local name="$1"; shift
+  if snap list "$name" >/dev/null 2>&1; then info "snap $name already installed"; return 0; fi
+  run sudo snap install "$name" "$@"
+}
+
+# Add an apt repo from a signing key URL + source line. Idempotent.
+apt_repo() {  # apt_repo <name> <key-url> <source-line>
+  [ "$OS" = linux ] || return 0
+  local name="$1" key="$2" line="$3"
+  local keyring="/etc/apt/keyrings/${name}.gpg"
+  local list="/etc/apt/sources.list.d/${name}.list"
+  [ -f "$list" ] && { info "repo $name already configured"; return 0; }
+  run sudo install -d -m 0755 /etc/apt/keyrings
+  if [ "$DRY_RUN" = 1 ]; then
+    info "\$ curl -fsSL $key | sudo gpg --dearmor -o $keyring"
+    info "\$ echo '$line' | sudo tee $list"
+  else
+    curl -fsSL "$key" | sudo gpg --dearmor -o "$keyring"
+    sudo chmod 0644 "$keyring"
+    echo "$line" | sudo tee "$list" >/dev/null
+  fi
+  APT_UPDATED=0
+}
+
+# ---------------------------------------------------------------- sections
+
+section_core() {
+  log "Core CLI + dev tools"
+  if [ "$OS" = linux ]; then
+    apt_install \
+      build-essential git curl wget ca-certificates gnupg unzip xz-utils \
+      jq tree htop tmux rsync socat netcat-openbsd whois bind9-dnsutils \
+      ripgrep fd-find git-delta shellcheck hyperfine just pandoc \
+      python3 python3-venv python3-pynvim \
+      xclip wl-clipboard asciinema
+
+    # gh is not in the Ubuntu archive.
+    apt_repo github-cli https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/github-cli.gpg] https://cli.github.com/packages stable main"
+    apt_install gh
+
+    snap_install nvim --classic
+    snap_install yq
+    snap_install chezmoi --classic
+
+    # Ubuntu ships fd as fdfind and delta as git-delta; alias in .bashrc if wanted.
+    have fdfind && ! have fd && info "fd is installed as 'fdfind' on Ubuntu"
+  else
+    have brew || run /bin/bash -c \
+      "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    brew_install git curl wget jq tree htop tmux rsync socat \
+      ripgrep fd git-delta shellcheck hyperfine just pandoc \
+      python3 gh neovim yq chezmoi asciinema
+  fi
+}
+
+section_lxd() {
+  if [ "$OS" != linux ]; then
+    warn "skipping LXD stack: Linux only"
+    return 0
+  fi
+  log "LXD / Canonical work stack"
+
+  # Build dependencies for lxd + dqlite + go-lxc.
+  apt_install \
+    autoconf automake libtool pkg-config meson ninja-build cmake gettext \
+    libacl1-dev libapparmor-dev libcap-dev libdbus-1-dev liblxc-dev \
+    liblz4-dev libseccomp-dev libsqlite3-dev libudev-dev libuv1-dev \
+    libfuse3-dev fuse3
+
+  # Storage backends.
+  apt_install \
+    acl attr btrfs-progs zfsutils-linux lvm2 thin-provisioning-tools \
+    xfsprogs xfslibs-dev dosfstools gdisk e2fsprogs bcache-tools \
+    squashfs-tools squashfs-tools-ng ceph-common
+
+  # Networking.
+  apt_install \
+    nftables ebtables iproute2 dnsmasq-base openvswitch-switch ovn-host ovn-central
+
+  # VM / image tooling.
+  apt_install \
+    qemu-system-x86 qemu-utils qemu-block-extra qemu-user-static \
+    virtiofsd swtpm busybox-static umoci expect s3cmd
+
+  snap_install lxd
+  snap_install snapcraft --classic
+  snap_install rockcraft --classic
+
+  if ! getent group lxd | grep -w "$USER" >/dev/null; then
+    run sudo usermod -aG lxd "$USER"
+    warn "added $USER to the lxd group — log out and back in for it to take effect"
+  fi
+}
+
+section_go() {
+  log "Go toolchain + tools"
+  if [ "$OS" = linux ]; then snap_install go --classic; else brew_install go; fi
+  have go || { warn "go not on PATH yet; skipping go tools"; return 0; }
+
+  local tools=(
+    golang.org/x/tools/gopls@latest
+    github.com/go-delve/delve/cmd/dlv@latest
+    github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+    honnef.co/go/tools/cmd/staticcheck@latest
+    mvdan.cc/sh/v3/cmd/shfmt@latest
+    golang.org/x/tools/cmd/goimports@latest
+    github.com/daixiang0/gci@latest
+    github.com/jesseduffield/lazygit@latest
+    github.com/charmbracelet/glow@latest
+  )
+  local t
+  for t in "${tools[@]}"; do
+    info "go install ${t}"
+    run go install "$t"
+  done
+}
+
+section_rust() {
+  log "Rust toolchain"
+  if [ "$OS" = linux ]; then
+    snap_install rustup --classic
+  else
+    brew_install rustup
+  fi
+  have rustup && run rustup default stable
+}
+
+section_node() {
+  log "Node + agent CLIs"
+  if [ "$OS" = linux ]; then apt_install nodejs npm; else brew_install node; fi
+  have npm || { warn "npm not on PATH; skipping global installs"; return 0; }
+  run npm install -g @github/copilot @openai/codex opencode-ai
+  info "Claude Code: https://claude.com/claude-code"
+}
+
+section_desktop() {
+  log "Desktop apps"
+  if [ "$OS" = linux ]; then
+    snap_install code --classic
+    snap_install ghostty --classic
+    snap_install mattermost-desktop
+
+    apt_repo google-chrome https://dl.google.com/linux/linux_signing_key.pub \
+      "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main"
+    apt_install google-chrome-stable
+
+    local codename; codename="$(. /etc/os-release && echo "$VERSION_CODENAME")"
+    apt_repo tailscale "https://pkgs.tailscale.com/stable/ubuntu/${codename}.noarmor.gpg" \
+      "deb [signed-by=/etc/apt/keyrings/tailscale.gpg] https://pkgs.tailscale.com/stable/ubuntu ${codename} main"
+    apt_install tailscale
+    info "run 'sudo tailscale up' to authenticate"
+  else
+    run brew install --cask visual-studio-code google-chrome ghostty mattermost tailscale
+  fi
+}
+
+section_fonts() {
+  log "Fonts (UbuntuMono Nerd Font)"
+  local dir ver url
+  if [ "$OS" = macos ]; then
+    run brew install --cask font-ubuntu-mono-nerd-font
+    return 0
+  fi
+  dir="$HOME/.local/share/fonts"
+  if fc-list 2>/dev/null | grep -i "UbuntuMono Nerd Font" >/dev/null; then
+    info "UbuntuMono Nerd Font already installed"
+    return 0
+  fi
+  ver="v3.2.1"
+  url="https://github.com/ryanoasis/nerd-fonts/releases/download/${ver}/UbuntuMono.zip"
+  run mkdir -p "$dir"
+  if [ "$DRY_RUN" = 1 ]; then
+    info "\$ curl -fsSL $url | bsdtar -xf- -C $dir"
+  else
+    local tmp; tmp="$(mktemp -d)"
+    curl -fsSL "$url" -o "$tmp/UbuntuMono.zip"
+    unzip -qo "$tmp/UbuntuMono.zip" -d "$dir"
+    rm -rf "$tmp"
+    fc-cache -f "$dir" >/dev/null
+  fi
+}
+
+section_repos() {
+  log "Repositories"
+  run mkdir -p "$GIT_DIR"
+  local dest="$GIT_DIR/lxd-dev"
+  if [ -d "$dest/.git" ]; then
+    info "lxd-dev already cloned at $dest"
+  else
+    run git clone "$LXD_DEV_FORK" "$dest"
+  fi
+  if [ "$DRY_RUN" = 1 ]; then
+    info "\$ git -C $dest remote add upstream $LXD_DEV_UPSTREAM"
+  elif ! git -C "$dest" remote | grep -x upstream >/dev/null; then
+    git -C "$dest" remote add upstream "$LXD_DEV_UPSTREAM"
+    info "added upstream remote"
+  else
+    info "upstream remote already present"
+  fi
+}
+
+section_dotfiles() {
+  log "Dotfiles"
+  if ! have chezmoi; then
+    warn "chezmoi not installed; run the 'core' section first"
+    return 0
+  fi
+  if [ -d "$HOME/.local/share/chezmoi/.git" ]; then
+    info "chezmoi source already initialised"
+  else
+    run chezmoi init --apply git@github.com:kadinsayani/dotfiles.git
+  fi
+  # autoCommit/autoPush are not in the dotfiles repo; recreate them here.
+  local cfg="$HOME/.config/chezmoi/chezmoi.toml"
+  if [ -f "$cfg" ]; then
+    info "chezmoi.toml already present"
+  else
+    run mkdir -p "$(dirname "$cfg")"
+    if [ "$DRY_RUN" = 1 ]; then
+      info "\$ write $cfg (git.autoCommit/autoPush)"
+    else
+      printf '[git]\nautoCommit = true\nautoPush = true\n' > "$cfg"
+    fi
+  fi
+}
+
+# ---------------------------------------------------------------- main
+
+ALL_SECTIONS=(core lxd go rust node desktop fonts repos dotfiles)
+
+main() {
+  local sections=("$@")
+  [ ${#sections[@]} -eq 0 ] && sections=("${ALL_SECTIONS[@]}")
+
+  [ "$DRY_RUN" = 1 ] && log "DRY RUN — nothing will be changed"
+  info "detected OS: $OS"
+
+  local s
+  for s in "${sections[@]}"; do
+    if ! printf '%s\n' "${ALL_SECTIONS[@]}" | grep -x "$s" >/dev/null; then
+      echo "unknown section: $s (valid: ${ALL_SECTIONS[*]})" >&2
+      exit 1
+    fi
+  done
+  for s in "${sections[@]}"; do "section_${s}"; done
+
+  log "Done"
+  info "remaining manual steps:"
+  info "  - authenticate: gh auth login, sudo tailscale up"
+  info "  - add your SSH key to GitHub before the 'repos' section"
+  info "  - log out/in for the lxd group to apply"
+}
+
+main "$@"
