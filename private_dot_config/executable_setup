@@ -386,9 +386,143 @@ section_dotfiles() {
   fi
 }
 
+# ---------------------------------------------------------------- doctor
+
+DOCTOR_FAIL=0
+DOCTOR_WARN=0
+
+d_ok()   { printf '    \033[38;2;115;218;202mPASS\033[0m  %s\n' "$*"; }
+d_bad()  { printf '    \033[38;2;247;118;142mFAIL\033[0m  %s\n' "$*"; DOCTOR_FAIL=$((DOCTOR_FAIL+1)); }
+d_warn() { printf '    \033[38;2;224;175;104mWARN\033[0m  %s\n' "$*"; DOCTOR_WARN=$((DOCTOR_WARN+1)); }
+
+# d_cmd <binary> [note] — FAIL if the binary is not on PATH.
+d_cmd() {
+  if have "$1"; then d_ok "$1"; else d_bad "$1 not on PATH${2:+ ($2)}"; fi
+}
+
+# d_cmd_opt <binary> [note] — WARN instead of FAIL; for things that are nice to have.
+d_cmd_opt() {
+  if have "$1"; then d_ok "$1"; else d_warn "$1 not on PATH${2:+ ($2)}"; fi
+}
+
+section_doctor() {
+  log "Doctor — verifying, changing nothing"
+
+  info "core tools"
+  local c
+  for c in git curl jq tree htop tmux rg shellcheck chezmoi; do d_cmd "$c"; done
+  have fd || have fdfind && d_ok "fd (as $(command -v fd 2>/dev/null || command -v fdfind))" || d_bad "fd/fdfind"
+  d_cmd_opt bat
+  d_cmd_opt fzf
+  d_cmd_opt delta "git-delta; lazygit pager"
+
+  info "editors + multiplexers"
+  d_cmd nvim
+  d_cmd_opt hx "helix"
+  d_cmd_opt zellij
+
+  info "languages"
+  d_cmd go
+  d_cmd_opt cargo "rustup default stable"
+  d_cmd python3
+
+  info "agent CLIs"
+  d_cmd_opt claude
+  d_cmd_opt copilot
+  d_cmd_opt codex
+  d_cmd_opt opencode
+
+  if [ "$OS" = linux ]; then
+    info "lxd-dev stack"
+    d_cmd lxc
+    d_cmd_opt workshop
+    d_cmd secret-tool "libsecret-tools; needed by just setup-keyring"
+    d_cmd envsubst "gettext-base"
+    if have just; then
+      if [ "$(command -v just)" = /usr/bin/just ]; then
+        d_ok "just (apt build)"
+      else
+        d_bad "just is $(command -v just), not /usr/bin/just — keyring setup will fail"
+      fi
+    else
+      d_bad "just not on PATH"
+    fi
+    if python3 -c 'import yaml' 2>/dev/null; then
+      d_ok "python3 PyYAML"
+    else
+      d_bad "python3 PyYAML missing — generate-workshop-config will fail"
+    fi
+    if id -nG 2>/dev/null | grep -w lxd >/dev/null; then
+      d_ok "lxd group applied to this session"
+    elif getent group lxd 2>/dev/null | grep -w "$USER" >/dev/null; then
+      d_warn "in the lxd group, but this session predates it — log out and back in"
+    else
+      d_bad "$USER is not in the lxd group"
+    fi
+  fi
+
+  info "ssh + git identity"
+  if [ -f "$HOME/.ssh/id_ed25519" ]; then d_ok "ssh key id_ed25519"; else d_bad "no id_ed25519 in .ssh"; fi
+  if [ -n "${SSH_AUTH_SOCK:-}" ]; then d_ok "ssh-agent running"; else d_warn "no ssh-agent in this session"; fi
+  if ssh-keygen -F github.com >/dev/null 2>&1; then
+    d_ok "github.com in known_hosts"
+  else
+    d_warn "github.com not in known_hosts — first clone will prompt"
+  fi
+  local ssh_out
+  ssh_out="$(ssh -o BatchMode=yes -o ConnectTimeout=5 -T git@github.com 2>&1 || true)"
+  case "$ssh_out" in
+    *"successfully authenticated"*) d_ok "github.com SSH auth" ;;
+    *) d_warn "github.com SSH auth failed — add ~/.ssh/id_ed25519.pub to GitHub" ;;
+  esac
+  if [ -f "$HOME/.ssh/allowed_signers" ]; then
+    d_ok "allowed_signers"
+  else
+    d_warn "no allowed_signers — git cannot verify your own signatures"
+  fi
+
+  info "theming"
+  if have bat && bat --list-themes 2>/dev/null | grep -q tokyonight_night; then
+    d_ok "bat tokyonight_night theme (run 'bat cache --build' if it drops out)"
+  else
+    d_warn "bat tokyonight_night theme not registered"
+  fi
+  if [ "$OS" = linux ] && fc-list 2>/dev/null | grep -i "UbuntuMono Nerd Font" >/dev/null; then
+    d_ok "UbuntuMono Nerd Font"
+  elif [ "$OS" = linux ]; then
+    d_warn "UbuntuMono Nerd Font missing — glyphs will be wrong"
+  fi
+
+  info "dotfiles"
+  if have chezmoi; then
+    if [ -z "$(chezmoi status 2>/dev/null)" ]; then
+      d_ok "chezmoi status clean"
+    else
+      d_warn "chezmoi has unapplied changes — run 'chezmoi diff'"
+    fi
+  fi
+  if [ -d "$GIT_DIR/lxd-dev/.git" ]; then
+    d_ok "lxd-dev cloned"
+    if [ -f "$GIT_DIR/lxd-dev/config/$USER/config.json" ]; then
+      d_ok "lxd-dev config/$USER/config.json"
+    else
+      d_warn "no lxd-dev config/$USER/config.json — 'just setup' needs it"
+    fi
+  else
+    d_warn "lxd-dev not cloned"
+  fi
+
+  printf '\n'
+  if [ "$DOCTOR_FAIL" -eq 0 ] && [ "$DOCTOR_WARN" -eq 0 ]; then
+    info "all checks passed"
+  else
+    info "$DOCTOR_FAIL failed, $DOCTOR_WARN warnings"
+  fi
+}
+
 # ---------------------------------------------------------------- main
 
-ALL_SECTIONS=(core lxd go rust node desktop fonts ssh repos lxddev dotfiles)
+ALL_SECTIONS=(core lxd go rust node desktop fonts ssh repos lxddev dotfiles doctor)
 
 main() {
   local sections=("$@")
@@ -405,6 +539,11 @@ main() {
     fi
   done
   for s in "${sections[@]}"; do "section_${s}"; done
+
+  if [ "$DOCTOR_FAIL" -gt 0 ]; then
+    log "Done — with $DOCTOR_FAIL failed check(s)"
+    return 1
+  fi
 
   log "Done"
   info "remaining manual steps:"
