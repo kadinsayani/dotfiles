@@ -11,7 +11,7 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'preservim/nerdtree'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
-Plugin 'sheerun/vim-polyglot'
+" Plugin 'sheerun/vim-polyglot'
 Plugin 'fatih/vim-go'
 Plugin 'github/copilot.vim'
 call vundle#end()
@@ -22,12 +22,6 @@ set encoding=utf-8
 syntax on
 " Display line numbers
 set number
-" Set the number of spaces for each level of indentation
-set shiftwidth=4
-" Set the number of spaces for a tab character
-set tabstop=4
-" Use spaces instead of tabs for indentation
-set expandtab
 " Disable backup files
 set nobackup
 " Incremental search for search operations

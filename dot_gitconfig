@@ -19,7 +19,7 @@
 	sort = version:refname
 [diff]
 	algorithm = histogram
-	colorMoved = plain
+	#colorMoved = plain
 	mnemonicPrefix = true
 	renames = true
 [help]
@@ -27,3 +27,5 @@
 [rerere]
 	enabled = true
 	autoupdate = true
+[init]
+	defaultBranch = main

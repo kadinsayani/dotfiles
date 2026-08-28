@@ -28,15 +28,10 @@ layout {
             plugin location="zellij:status-bar"
         }
     }
-    tab name="lxd" cwd="~/git/lxd" focus=true {
+    tab name="dev" cwd="~/git" focus=true {
         term split_direction="vertical" {
 			pane
-			pane size="30%"
-        }
-    }
-    tab name="~/git" cwd="~/git" {
-        term split_direction="vertical" {
-			pane
+			pane size="50%"
         }
     }
     tab name="notes" cwd="~/git/notes/" {
@@ -50,12 +45,6 @@ layout {
 			pane command="lxc" {
 				args "monitor" "--pretty"
 			}
-		}
-	}
-	tab name="copilot" cwd="~/git/lxd" {
-		term split_direction="vertical" {
-			pane command="copilot"
-			pane
 		}
 	}
 }
