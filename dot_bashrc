@@ -138,7 +138,7 @@ alias lxddebug='sudo --preserve-env=PATH,CGO_LDFLAGS,CGO_CFLAGS,GORACE,LXD_DIR,L
 alias makedebug='make DEBUG="-gcflags=\"all=-N -l\""'
 alias debug='makedebug && lxddebug'
 alias gcapache='git commit --amend -s --trailer License:Apache-2.0'
-alias forcepush='git push --force-with-lease --no-verify'
+alias forcepush='git push --force-with-lease'
 
 export EDITOR=nvim
 export VISUAL=$EDITOR
@@ -175,7 +175,7 @@ alias lx='lxc exec $1 -- '
 
 lxt() {
   lxc config device set lxdtest lxd-git source=$(pwd)
-  sleep 1
+  sleep 3
   lxc exec lxdtest -- bash -c "cd lxd && make && make test-shell"
 }
 
@@ -198,3 +198,37 @@ tempe () {
 
 PROMPT_COMMAND='PS1_CMD1=$(git branch --show-current 2>/dev/null); if [ -n "$PS1_CMD1" ]; then PS1_CMD1=" [$PS1_CMD1]"; fi'
 PS1='\[\e[1;32m\]\u@\h\[\e[0m\] \[\e[1;34m\]\w\[\e[0m\]\[\e[1;33m\]${PS1_CMD1}\[\e[0m\] \[\e[1;35m\]\@\[\e[0m\]\n\$ '
+
+# opencode
+export PATH=/home/kadinsayani/.opencode/bin:$PATH
+###-begin-opencode-completions-###
+#
+# yargs command completion script
+#
+# Installation: opencode completion >> ~/.bashrc
+#    or opencode completion >> ~/.bash_profile on OSX.
+#
+_opencode_yargs_completions()
+{
+    local cur_word args type_list
+
+    cur_word="${COMP_WORDS[COMP_CWORD]}"
+    args=("${COMP_WORDS[@]}")
+
+    # ask yargs to generate completions.
+    # see https://stackoverflow.com/a/40944195/7080036 for the spaces-handling awk
+    mapfile -t type_list < <(opencode --get-yargs-completions "${args[@]}")
+    mapfile -t COMPREPLY < <(compgen -W "$( printf '%q ' "${type_list[@]}" )" -- "${cur_word}" |
+        awk '/ / { print "\""$0"\"" } /^[^ ]+$/ { print $0 }')
+
+    # if no match was found, fall back to filename completion
+    if [ ${#COMPREPLY[@]} -eq 0 ]; then
+      COMPREPLY=()
+    fi
+
+    return 0
+}
+complete -o bashdefault -o default -F _opencode_yargs_completions opencode
+###-end-opencode-completions-###
+
+eval "$(just --completions bash)"
