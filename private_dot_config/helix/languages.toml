@@ -1,6 +1,0 @@
-[[language]]
-name = "go"
-formatter = { command = "gofmt" }
-
-[[language]]
-name = "bash"
