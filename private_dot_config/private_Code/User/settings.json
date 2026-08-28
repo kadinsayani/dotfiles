@@ -1,0 +1,106 @@
+{
+    "git.autofetch": true,
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact"
+    },
+    "git.enableSmartCommit": true,
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "git.confirmSync": false,
+    "java.project.importHint": false,
+    "workbench.editorAssociations": {
+        "*.ipynb": "jupyter-notebook"
+    },
+    "explorer.confirmDragAndDrop": false,
+    "git.ignoreRebaseWarning": true,
+    "editor.inlineSuggest.enabled": true,
+    "haskell.manageHLS": "GHCup",
+    "editor.linkedEditing": true,
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "dateTime.use24HourClock": false,
+    "[markdown]": {
+        "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+    },
+    "lldb.library": "/Library/Developer/CommandLineTools/Library/PrivateFrameworks/LLDB.framework/Versions/A/LLDB",
+    "prolog.executablePath": "/opt/homebrew/bin/swipl",
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "[css]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "githubPullRequests.pullBranch": "never",
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "C_Cpp.clang_format_fallbackStyle": "LLVM",
+    "editor.inlayHints.enabled": "offUnlessPressed",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8",
+    },
+    "python.defaultInterpreterPath": "/opt/homebrew/bin/python3",
+    "editor.fontWeight": "normal",
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "cmake.configureOnOpen": true,
+    "svelte.enable-ts-plugin": true,
+    "redhat.telemetry.enabled": true,
+    "editor.fontSize": 15,
+    "terminal.integrated.fontSize": 15,
+    "window.nativeTabs": false,
+    "workbench.editor.tabCloseButton": "left",
+    "editor.minimap.renderCharacters": false,
+    "workbench.editor.showIcons": false,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "arduino.useArduinoCli": true,
+    "arduino.path": "/opt/homebrew/bin/",
+    "arduino.commandPath": "arduino-cli",
+    "go.toolsManagement.autoUpdate": true,
+    "cmake.options.statusBarVisibility": "visible",
+    "cmake.showOptionsMovedNotification": false,
+    "editor.fontFamily": "'UbuntuMono Nerd Font Mono', '0xProto Nerd Font Mono', 'SF Mono', Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontLigatures": true,
+    "codepoint.statusbar": "hexadecimal",
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false
+    },
+    "workbench.editor.tabActionLocation": "left",
+    "terminal.integrated.env.osx": {
+        "FIG_NEW_SESSION": "1"
+    },
+    "github.gitAuthentication": false,
+    "git.enableCommitSigning": true,
+    "git.alwaysSignOff": true,
+    "editor.minimap.enabled": false,
+    "editor.wordWrap": "wordWrapColumn",
+    "go.alternateTools": {},
+    "gitlens.currentLine.enabled": false,
+    "websearch.preferredEngine": "bing",
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "chat.mcp.autostart": "newAndOutdated",
+    "glassit.alpha": 220,
+    "workbench.colorTheme": "Tokyo Night",
+    "workbench.iconTheme": "catppuccin-mocha"
+}
