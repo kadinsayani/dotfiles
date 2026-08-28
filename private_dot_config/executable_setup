@@ -87,6 +87,7 @@ section_core() {
     apt_install gh
 
     snap_install nvim --classic
+    snap_install helix --classic
     snap_install yq
     snap_install chezmoi --classic
 
@@ -97,7 +98,7 @@ section_core() {
       "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew_install git curl wget jq tree htop tmux rsync socat \
       ripgrep fd git-delta shellcheck hyperfine just pandoc \
-      python3 gh neovim yq chezmoi asciinema
+      python3 gh neovim helix yq chezmoi asciinema
   fi
 }
 
@@ -171,6 +172,13 @@ section_rust() {
     brew_install rustup
   fi
   have rustup && run rustup default stable
+
+  # zellij has no snap/apt package; it comes from crates.io.
+  if have cargo && ! have zellij; then
+    run cargo install zellij
+  else
+    info "zellij already installed (or cargo not on PATH yet)"
+  fi
 }
 
 section_node() {
